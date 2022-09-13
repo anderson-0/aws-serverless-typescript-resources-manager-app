@@ -1,0 +1,31 @@
+{
+  "name": "aws-serverless-typescript-resource-management-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/anderson-0/aws-serverless-typescript-resource-management-app.git",
+  "author": "Anderson da Silva <anderson.consultant.it@outlook.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "scripts": {
+    "dev": "serverless offline ",
+    "debug": "set SLS_DEBUG=* && node --inspect node_modules/serverless/bin/serverless offline -s dev",
+    "deploy": "serverless deploy",
+    "destroy": "serverless remove",
+    "test": "serverless-bundle test"
+  },
+  "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1214.0",
+    "serverless": "^3.22.0",
+    "serverless-bundle": "^5.5.0",
+    "serverless-offline": "^10.0.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.103",
+    "@types/uuid": "^8.3.4",
+    "typescript": "^4.8.3"
+  }
+}

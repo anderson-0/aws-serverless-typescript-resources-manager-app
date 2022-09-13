@@ -1,0 +1,148 @@
+service: resource-management-app
+
+frameworkVersion: "3"
+
+useDotenv: true
+
+plugins:
+  - serverless-bundle
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    apiKey: ${env:api_key}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  versionFunctions: false
+  stage: ${opt:stage, 'dev'}
+  environment:
+    stage: ${opt:stage, 'dev'}
+    SERVERS_TABLE: ${self:service}-${opt:stage, 'dev'}-servers
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "*"
+  apiGateway:
+    apiKeys:
+      - name: ${self:service}-${opt:stage, 'dev'}-api-key
+functions:
+  auth:
+    handler: src/auth.handler
+    events:
+      - http:
+          path: auth
+          method: post
+          cors: true
+  listResources:
+    handler: src/resources/list.handler
+    events:
+      - http:
+          path: resources
+          method: get
+          cors: true
+          authorizer:
+            name: auth
+            type: request
+  createResource:
+    handler: src/resources/create.handler
+    events:
+      - http:
+          path: resources
+          method: post
+          cors: true
+  getResource:
+    handler: src/resources/get.handler
+    events:
+      - http:
+          path: resources/{id}
+          method: get
+          cors: true
+  updateResource:
+    handler: src/resources/update.handler
+    events:
+      - http:
+          path: resources/{id}
+          method: put
+          cors: true
+  deleteResource:
+    handler: src/resources/delete.handler
+    events:
+      - http:
+          path: resources/{id}
+          method: delete
+          cors: true
+  createServer:
+    handler: src/servers/create.handler
+    events:
+      - http:
+          path: servers
+          method: post
+          cors: true
+          private: true
+  listServers:
+    handler: src/servers/list.handler
+    events:
+      - http:
+          path: servers
+          method: get
+          cors: true
+          private: true
+  getServer:
+    handler: src/servers/get.handler
+    events:
+      - http:
+          path: servers/{id}
+          method: get
+          cors: true
+          private: true
+  updateServer:
+    handler: src/servers/update.handler
+    events:
+      - http:
+          path: servers/{id}
+          method: put
+          cors: true
+          private: true
+  deleteServer:
+    handler: src/servers/delete.handler
+    events:
+      - http:
+          path: servers/{id}
+          method: delete
+          cors: true
+          private: true
+
+resources:
+  Resources:
+    ResourcesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-resources
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    ServersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-servers
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

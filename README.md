@@ -1,2 +1,2 @@
-# aws-serverless-typescript-resources-manager-app
+# aws-serverless-typescript-resource-management-app
  
