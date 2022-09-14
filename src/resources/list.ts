@@ -6,6 +6,7 @@ export async function handler(event: any, context: Context) {
 
   const params: any = {
     TableName: process.env.RESOURCES_TABLE as string,
+    IndexName: 'ServerIdIndex',
     KeyConditionExpression: 'serverId = :serverId',
     ExpressionAttributeValues: {
       ':serverId': event.requestContext.authorizer.serverId,

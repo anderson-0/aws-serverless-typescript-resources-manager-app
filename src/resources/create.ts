@@ -9,11 +9,11 @@ export async function handler(event: any, context: Context) {
   
   let params: any = {
     TableName: process.env.RESOURCES_TABLE as string,
+    IndexName: 'ServerIdIndex',
     KeyConditionExpression: 'serverId = :serverId',
     ExpressionAttributeValues: {
       ':serverId': serverId,
     },
-    Select: 'COUNT',
   }
 
   const response = await dynamoDb.query(params).promise()
