@@ -22,10 +22,6 @@ export async function handler(event: any): Promise<APIGatewayProxyResult> {
   const policy = active ? 'Allow' : 'Deny';
   console.log(`Is user active? ${active}`);
 
-  const response = JSON.stringify({
-    something: "It's something"
-  });
-
   return generatePolicy('user', policy, event.methodArn, apiKey);
 }
 
