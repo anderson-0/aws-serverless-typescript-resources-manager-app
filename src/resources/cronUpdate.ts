@@ -3,6 +3,7 @@ import AWS from 'aws-sdk'
 
 export async function handler(event: any, context: Context) {
   const validActions: any = {
+    'creating': 'started',
     'starting': 'started',
     'stopping': 'stopped',
     'restarting': 'started',
