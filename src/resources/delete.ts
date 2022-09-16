@@ -1,19 +1,32 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
-import AWS from 'aws-sdk'
+import { prisma } from '../../prisma/prisma'
+import { verifyCredentials } from '../auth'
 
-export async function handler(event: any, context: Context) {
+export async function handler(event: any) {
+  
   const { id } = event.pathParameters
-
-  const dynamoDb = new AWS.DynamoDB.DocumentClient()
-
-  const params: any = {
-    TableName: process.env.RESOURCES_TABLE as string,
-    Key: {
-      id: id,
-    },
+  const serverId = await verifyCredentials(event)
+  
+  if (serverId === null) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({
+        error: 'Unauthorized'
+      })
+    }
   }
 
-  await dynamoDb.delete(params).promise()
+  const deletedResources = await prisma.resource.deleteMany({
+    where: {
+      AND: [
+        {
+          id
+        },
+        {
+          serverId
+        }
+      ]
+    },
+  })
 
   return {
     statusCode: 204,

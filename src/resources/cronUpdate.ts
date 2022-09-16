@@ -1,7 +1,7 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import AWS from 'aws-sdk'
+import { prisma } from '../../prisma/prisma'
 
-export async function handler(event: any, context: Context) {
+export async function handler() {
   const validActions: any = {
     'creating': 'started',
     'starting': 'started',
@@ -9,22 +9,14 @@ export async function handler(event: any, context: Context) {
     'restarting': 'started',
   }
 
-  const dynamoDb = new AWS.DynamoDB.DocumentClient()
-
-  const params: any = {
-    TableName: process.env.RESOURCES_TABLE as string,
-  }
-
-  const resources = await dynamoDb.scan(params).promise()
-
-  resources.Items?.map(async (resource: any) => {
-    await dynamoDb.put({
-      TableName: process.env.RESOURCES_TABLE as string,
-      Item: {
-        ...resource,
-        state: validActions[resource.state],
-        updatedAt: new Date().toISOString(),
+  Object.entries(validActions).forEach(async ([state, newState]) => {
+    await prisma.resource.updateMany({
+      where: {
+        state
       },
-    }).promise()
+      data: {
+        state: newState as string,
+      },
+    })
   })
 }

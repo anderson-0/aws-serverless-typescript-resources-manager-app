@@ -1,18 +1,13 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
+import { APIGatewayProxyEvent } from 'aws-lambda'
 import AWS from 'aws-sdk';
+import { prisma } from '../../prisma/prisma';
 
-export async function handler(event: APIGatewayProxyEvent, context: Context) {
+export async function handler(event: APIGatewayProxyEvent) {
 
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
-  const params = {
-    TableName: process.env.SERVERS_TABLE as string,
-  };
-
-  const result = await dynamoDb.scan(params).promise();
+  const serversList = await prisma.server.findMany()
 
   return {
     statusCode: 200,
-    body: JSON.stringify(result.Items),
+    body: JSON.stringify(serversList),
   }
 }

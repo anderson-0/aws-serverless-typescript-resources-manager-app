@@ -1,7 +1,7 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
+import { APIGatewayProxyEvent } from 'aws-lambda'
 import AWS from 'aws-sdk';
 
-export async function handler(event: APIGatewayProxyEvent, context: Context) {
+export async function handler(event: APIGatewayProxyEvent) {
 
   if (!event.pathParameters) {
     return {

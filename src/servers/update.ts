@@ -1,6 +1,6 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
+import { APIGatewayProxyEvent} from 'aws-lambda'
 
-export async function handler(event: APIGatewayProxyEvent, context: Context) {
+export async function handler(event: APIGatewayProxyEvent) {
   return {
     statusCode: 200,
     body: JSON.stringify({

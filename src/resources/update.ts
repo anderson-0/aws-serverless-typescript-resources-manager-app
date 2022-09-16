@@ -1,9 +1,21 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import AWS from 'aws-sdk'
+import { prisma } from '../../prisma/prisma'
+import { verifyCredentials } from '../auth'
 
-export async function handler(event: any, context: Context) {
-  const { serverId } = event.requestContext.authorizer
+export async function handler(event: any) {
+  const serverId = await verifyCredentials(event)
+  
+  if (serverId === null) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({
+        error: 'Unauthorized'
+      })
+    }
+  }
+  
   const { state } = JSON.parse(event.body)
+  const { id } = event.pathParameters
 
   const validActions: any = {
     'start': 'starting',
@@ -20,27 +32,22 @@ export async function handler(event: any, context: Context) {
     }
   }
 
-  const dynamoDb = new AWS.DynamoDB.DocumentClient()
+  await prisma.resource.updateMany({
+    where: {
+      AND: [
+        {
+          id
+        },
+        {
+          serverId
+        }
+      ]
+    },
+    data: {
+      state: validActions[state],
+    }
+  })
 
-  const params: any = {
-    TableName: process.env.RESOURCES_TABLE as string,
-    Key: {
-      serverId: serverId,
-      id: event.pathParameters.id,
-    },
-    
-    UpdateExpression: '#state = :state, #updatedAt = :updatedAt',
-    ExpressionAttributeNames: {
-      '#state': 'state',
-      '#updatedAt': 'updatedAt',
-    },
-    ExpressionAttributeValues: {
-      ':state': validActions[state],
-      ':updatedAt': new Date().toISOString(),
-    },
-  }
-
-  await dynamoDb.put(params).promise()
 
   return {
     statusCode: 200,

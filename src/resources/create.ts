@@ -1,23 +1,23 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import AWS from 'aws-sdk'
+import { verifyCredentials } from '../auth'
 import { v4 as uuidv4 } from 'uuid'
+import { prisma } from '../../prisma/prisma'
 
-export async function handler(event: any, context: Context) {
-  const { serverId } = event.requestContext.authorizer
+export async function handler(event: any) {
 
-  const dynamoDb = new AWS.DynamoDB.DocumentClient()
-  
-  let params: any = {
-    TableName: process.env.RESOURCES_TABLE as string,
-    IndexName: 'ServerIdIndex',
-    KeyConditionExpression: 'serverId = :serverId',
-    ExpressionAttributeValues: {
-      ':serverId': serverId,
-    },
+  const serverId = await verifyCredentials(event)
+  if (serverId === null) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({
+        error: 'Unauthorized'
+      })
+    }
   }
 
-  const response = await dynamoDb.query(params).promise()
-  if (response.Count as number >= 200) {
+  const countResources = await prisma.resource.count()
+
+  if (countResources >= 200) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -26,20 +26,16 @@ export async function handler(event: any, context: Context) {
     }
   }
 
-  const resource = {
-    serverId: serverId,
-    id: uuidv4(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    state: 'creating',
-  }
+  const resource = await prisma.resource.create({
+    data: {
+      serverId,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      state: 'creating',
+    },
+  })
 
-  params = {
-    TableName: process.env.RESOURCES_TABLE as string,
-    Item: resource
-  }
-
-  await dynamoDb.put(params).promise()
 
   return {
     statusCode: 200,

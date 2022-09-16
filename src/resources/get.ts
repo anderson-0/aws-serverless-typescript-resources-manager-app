@@ -1,22 +1,34 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import AWS from 'aws-sdk'
+import { prisma } from '../../prisma/prisma'
+import { verifyCredentials } from '../auth'
 
-export async function handler(event: any, context: Context) {
-  const dynamoDb = new AWS.DynamoDB.DocumentClient()
+export async function handler(event: any) {
   const { id } = event.pathParameters
-
-  const params: any = {
-    TableName: process.env.RESOURCES_TABLE as string,
-    KeyConditionExpression: 'id = :id and serverId = :serverId',
-    ExpressionAttributeValues: {
-      ':id': id,
-      ':serverId': event.requestContext.authorizer.serverId,
-    },
+  const serverId = await verifyCredentials(event)
+  
+  if (serverId === null) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({
+        error: 'Unauthorized'
+      })
+    }
   }
+  
+  const resource = await prisma.resource.findFirst({
+    where: {
+      AND: [
+        {
+          id
+        },
+        {
+          serverId
+        }
+      ]
+    },
+  })
 
-  const response = await dynamoDb.query(params).promise()
-
-  if (response.Items?.length === 0) {
+  if (resource === null) {
     return {
       statusCode: 404,
       body: JSON.stringify({
@@ -24,7 +36,7 @@ export async function handler(event: any, context: Context) {
       }),
     }
   }
-  const resource = response.Items ? response.Items[0] : null
+
   return {
     statusCode: 200,
     body: JSON.stringify(resource),

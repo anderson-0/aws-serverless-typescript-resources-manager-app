@@ -1,0 +1,26 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Server {
+  id                String     @id @default(uuid())
+  createdAt         DateTime   @default(now())
+  apiClientId       String
+  apiClientPassword String
+  Resource          Resource[]
+}
+
+model Resource {
+  id        String   @id @default(uuid())
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  state     String   @default("creating")
+  server    Server   @relation(fields: [serverId], references: [id])
+  serverId  String
+}

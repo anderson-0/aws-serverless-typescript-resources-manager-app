@@ -5,12 +5,13 @@ frameworkVersion: "3"
 useDotenv: true
 
 plugins:
-  - serverless-bundle
+  - serverless-plugin-typescript
   - serverless-offline
 
 custom:
   serverless-offline:
     apiKey: ${env:api_key}
+    useChildProcesses: true
 
 provider:
   name: aws
@@ -20,15 +21,6 @@ provider:
   stage: ${opt:stage, 'dev'}
   environment:
     stage: ${opt:stage, 'dev'}
-    SERVERS_TABLE: ${self:service}-${opt:stage, 'dev'}-servers
-    RESOURCES_TABLE: ${self:service}-${opt:stage, 'dev'}-resources
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-      Resource: "*"
   apiGateway:
     apiKeys:
       - name: ${self:service}-${opt:stage, 'dev'}-api-key
@@ -47,9 +39,6 @@ functions:
           path: resources
           method: get
           cors: true
-          authorizer:
-            name: auth
-            type: request
   createResource:
     handler: src/resources/create.handler
     events:
@@ -57,9 +46,6 @@ functions:
           path: resources
           method: post
           cors: true
-          authorizer:
-            name: auth
-            type: request
   getResource:
     handler: src/resources/get.handler
     events:
@@ -125,37 +111,10 @@ functions:
           method: delete
           cors: true
           private: true
-
-resources:
-  Resources:
-    ResourcesTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-resources
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: serverId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: ServerIdIndex
-            KeySchema:
-              - AttributeName: serverId
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-        BillingMode: PAY_PER_REQUEST
-    ServersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-servers
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
+package:
+  individually: true
+  patterns:
+    # - '!node_modules/.prisma/client/libquery_engine-*'
+    # - 'node_modules/.prisma/client/libquery_engine-rhel-*'
+    - "!node_modules/prisma/libquery_engine-*"
+    - "!node_modules/@prisma/engines/**"

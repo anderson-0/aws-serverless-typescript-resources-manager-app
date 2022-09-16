@@ -1,28 +1,54 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import AWS from 'aws-sdk';
-async function verifyKey(apiKey: string) {
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
-  const params = {
-    TableName: process.env.SERVERS_TABLE as string,
-    Key: {
-      id: apiKey,
-    },
-  };
+import { prisma } from '../prisma/prisma';
 
-  const result = await dynamoDb.get(params).promise();
-  return result.Item || null;
+export async function verifyCredentials(event: any) {
+  const apiClientId = event.headers.api_client_id;
+  const apiClientPassword = event.headers.api_client_password;
+  
+  if (apiClientId === undefined || apiClientPassword === undefined) {
+    return null
+  }
+
+  const server = await prisma.server.findFirst({
+    where: {
+      AND: [
+        {
+          apiClientId,
+        },
+        {
+          apiClientPassword,
+        },
+      ],
+    },
+  });
+  console.log(server)
+  if (!server) {
+    return null
+  }
+
+  return server.id
 }
 
 export async function handler(event: any): Promise<APIGatewayProxyResult> {
   const apiKey = event.headers.api_key
   console.log(apiKey)
 
-  const active = !!apiKey || !verifyKey(apiKey)// Do something to check if user is active or similar
+  const verifiedKey = await verifyCredentials(apiKey);
+  console.log(`verifiedKey: ${JSON.stringify(verifiedKey)}`);
+  console.log(`verified key truthy: ${!!verifiedKey}`);
+  const isVerified = !!verifiedKey// Do something to check if user is active or similar
 
-  const policy = active ? 'Allow' : 'Deny';
-  console.log(`Is user active? ${active}`);
+  const policy = isVerified ? 'Allow' : 'Deny';
+  console.log(`Allow Access? ${isVerified}`);
 
-  return generatePolicy('user', policy, event.methodArn, apiKey);
+  return generatePolicy('user', policy, event.methodArn, apiKey)
+  // return {
+  //   statusCode: 200,
+  //   body: JSON.stringify({
+  //     policy: generatePolicy('user', policy, event.methodArn, apiKey),
+  //     allowed: isVerified
+  //   })
+  // }
 }
 
 /**
