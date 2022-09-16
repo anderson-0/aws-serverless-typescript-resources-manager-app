@@ -14,6 +14,7 @@ export async function handler(event: any) {
   }
 
   const resources = await prisma.resource.findMany()
+  
   return {
     statusCode: 200,
     body: JSON.stringify(resources),

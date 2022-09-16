@@ -15,7 +15,6 @@
     "start": "npm run build && sls offline",
     "deploy": "npm run build && serverless deploy",
     "destroy": "serverless remove",
-    "test": "serverless-bundle test",
     "prisma:introspect": "prisma introspect",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name"
@@ -38,6 +37,7 @@
     "serverless-webpack-prisma": "^1.1.1",
     "ts-loader": "^9.3.1",
     "typescript": "^4.8.3",
+    "webpack": "^5.74.0",
     "webpack-node-externals": "^3.0.0"
   }
 }

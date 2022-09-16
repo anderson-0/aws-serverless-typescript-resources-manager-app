@@ -5,25 +5,38 @@ const nodeExternals = require('webpack-node-externals');
 module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
   entry: slsw.lib.entries,
+  devtool: 'source-map',
   resolve: {
     extensions: ['.ts']
   },
   target: 'node',
   // Since 'aws-sdk' is not compatible with webpack,
   // we exclude all node dependencies
-  externals: [nodeExternals()], // this is required
+  externals: ['aws-sdk', nodeExternals()], // this is required
 
   optimization: {
     // We do not want to minimize our code.
-    minimize: false,
+    minimize: true,
   },
   plugins: [
-    new CopyWebpackPlugin({ patterns: ["./prisma/schema.prisma"] }) // without this the prisma generate above will not work
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.join(
+            __dirname,
+            "node_modules/@prisma/cli/query-engine-darwin"
+          ),
+
+          // 'dist' is just the 'webpack' default
+          to: path.join(__dirname, "dist"),
+        },
+      ],
+    }),
   ],
   module: {
     rules: [
       {
-        test: /\.(tsx?)$/,
+        test: /\.(ts?)$/,
         loader: 'ts-loader',
         exclude: [
           [

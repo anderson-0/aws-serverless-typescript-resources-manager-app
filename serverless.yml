@@ -5,13 +5,14 @@ frameworkVersion: "3"
 useDotenv: true
 
 plugins:
+  # - serverless-plugin-typescript
   - serverless-offline
   - serverless-webpack
   - serverless-webpack-prisma
 
 custom:
   webpack:
-    webpackConfig: webpack.config.js
+    webpackConfig: ./webpack.config.js
     includeModules: true
     packager: npm
   serverless-offline:
@@ -118,22 +119,6 @@ functions:
           cors: true
           private: true
 package:
-# include:
-# - prisma/schema.prisma
-# individually: true
-patterns:
-  #   # - '!node_modules/.prisma/client/libquery_engine-*'
-  #   # - 'node_modules/.prisma/client/libquery_engine-rhel-*'
-  #   - "!node_modules/prisma/libquery_engine-*"
-  #   - "!node_modules/@prisma/engines/**"
-  - "!node_modules/.prisma/client/libquery_engine-*"
-  - "node_modules/.prisma/client/libquery_engine-rhel-*"
-  - "!node_modules/prisma/libquery_engine-*"
-  - "!node_modules/@prisma/engines/**"
-
-  # EXCLUDE query_engine-windows.dll.node
-  - "!node_modules/.prisma/client/query_engine-*"
-  # EXCLUDE .cache folder
-  - "!node_modules/.cache/**"
-  # EXCLUDE .bin folder
-  - "!node_modules/.bin/**"
+  # include:
+  # - prisma/schema.prisma
+  individually: true

@@ -21,7 +21,6 @@ export async function verifyCredentials(event: any) {
       ],
     },
   });
-  console.log(server)
   if (!server) {
     return null
   }
