@@ -15,7 +15,7 @@ export async function handler(event: any) {
     }
   }
 
-  const deletedResources = await prisma.resource.deleteMany({
+  await prisma.resource.deleteMany({
     where: {
       AND: [
         {

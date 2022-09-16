@@ -1,4 +1,3 @@
-import AWS from 'aws-sdk'
 import { verifyCredentials } from '../auth'
 import { v4 as uuidv4 } from 'uuid'
 import { prisma } from '../../prisma/prisma'

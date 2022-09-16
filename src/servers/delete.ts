@@ -1,4 +1,3 @@
-import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import { prisma } from '../../prisma/prisma'
 
 export async function handler(event: any) {

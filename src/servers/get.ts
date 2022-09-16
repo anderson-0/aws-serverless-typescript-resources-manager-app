@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'
-import AWS from 'aws-sdk';
+import { prisma } from '../../prisma/prisma';
 
 export async function handler(event: APIGatewayProxyEvent) {
 
@@ -14,17 +14,11 @@ export async function handler(event: APIGatewayProxyEvent) {
 
   const serverId = event.pathParameters.id
 
-  const dynamoDb = new AWS.DynamoDB.DocumentClient();
-
-  const params = {
-    TableName: process.env.SERVERS_TABLE as string,
-    Key: {
-      id: serverId,
-    },
-  };
-
-  const result = await dynamoDb.get(params).promise();
-  const server = result.Item;
+  const server = await prisma.server.findUnique({
+    where: {
+      id: serverId
+    }
+  })
 
   if (!server) {
     return {
@@ -37,6 +31,6 @@ export async function handler(event: APIGatewayProxyEvent) {
 
   return {
     statusCode: 200,
-    body: JSON.stringify(result.Item),
+    body: JSON.stringify(server),
   }
 }
