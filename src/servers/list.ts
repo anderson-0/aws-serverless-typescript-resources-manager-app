@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'
-import { prisma } from '../../prisma/prisma';
+import { prisma } from '../prisma';
 
 export async function handler(event: APIGatewayProxyEvent) {
 

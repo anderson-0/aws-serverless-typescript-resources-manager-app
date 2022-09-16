@@ -1,4 +1,4 @@
-import { prisma } from '../../prisma/prisma'
+import { prisma } from '../prisma'
 import { verifyCredentials } from '../auth'
 
 export async function handler(event: any) {

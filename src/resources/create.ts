@@ -1,6 +1,6 @@
 import { verifyCredentials } from '../auth'
 import { v4 as uuidv4 } from 'uuid'
-import { prisma } from '../../prisma/prisma'
+import { prisma } from '../prisma'
 
 export async function handler(event: any) {
 

@@ -5,10 +5,15 @@ frameworkVersion: "3"
 useDotenv: true
 
 plugins:
-  - serverless-plugin-typescript
   - serverless-offline
+  - serverless-webpack
+  - serverless-webpack-prisma
 
 custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true
+    packager: npm
   serverless-offline:
     apiKey: ${env:api_key}
     useChildProcesses: true
@@ -21,6 +26,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   environment:
     stage: ${opt:stage, 'dev'}
+    DATABASE_URL: ${env:DATABASE_URL}
   apiGateway:
     apiKeys:
       - name: ${self:service}-${opt:stage, 'dev'}-api-key
@@ -112,9 +118,22 @@ functions:
           cors: true
           private: true
 package:
-  individually: true
-  patterns:
-    # - '!node_modules/.prisma/client/libquery_engine-*'
-    # - 'node_modules/.prisma/client/libquery_engine-rhel-*'
-    - "!node_modules/prisma/libquery_engine-*"
-    - "!node_modules/@prisma/engines/**"
+# include:
+# - prisma/schema.prisma
+# individually: true
+patterns:
+  #   # - '!node_modules/.prisma/client/libquery_engine-*'
+  #   # - 'node_modules/.prisma/client/libquery_engine-rhel-*'
+  #   - "!node_modules/prisma/libquery_engine-*"
+  #   - "!node_modules/@prisma/engines/**"
+  - "!node_modules/.prisma/client/libquery_engine-*"
+  - "node_modules/.prisma/client/libquery_engine-rhel-*"
+  - "!node_modules/prisma/libquery_engine-*"
+  - "!node_modules/@prisma/engines/**"
+
+  # EXCLUDE query_engine-windows.dll.node
+  - "!node_modules/.prisma/client/query_engine-*"
+  # EXCLUDE .cache folder
+  - "!node_modules/.cache/**"
+  # EXCLUDE .bin folder
+  - "!node_modules/.bin/**"

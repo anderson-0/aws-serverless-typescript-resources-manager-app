@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent} from 'aws-lambda'
 import { faker } from '@faker-js/faker';
-import { prisma } from '../../prisma/prisma';
+import { prisma } from '../prisma';
 
 export async function handler(event: APIGatewayProxyEvent) {
   

@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import { prisma } from '../prisma/prisma';
+import { prisma } from './prisma';
 
 export async function verifyCredentials(event: any) {
   const apiClientId = event.headers.api_client_id;
